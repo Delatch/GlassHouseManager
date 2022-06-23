@@ -21,6 +21,7 @@ public class WeatherResult implements Serializable {
     private long sunrise;
     private long sunset;
     private boolean rainingState;
+    private String description;
 
     public WeatherResult(){}
 
@@ -28,97 +29,58 @@ public class WeatherResult implements Serializable {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public double getTemp() {
         return temp;
-    }
-
-    public void setTemp(double temp) {
-        this.temp = temp;
     }
 
     public double getTemp_min() {
         return temp_min;
     }
 
-    public void setTemp_min(double temp_min) {
-        this.temp_min = temp_min;
-    }
-
     public double getTemp_max() {
         return temp_max;
-    }
-
-    public void setTemp_max(double temp_max) {
-        this.temp_max = temp_max;
     }
 
     public double getFeels_like() {
         return feels_like;
     }
 
-    public void setFeels_like(double feels_like) {
-        this.feels_like = feels_like;
-    }
-
     public int getPressure() {
         return pressure;
-    }
-
-    public void setPressure(int pressure) {
-        this.pressure = pressure;
     }
 
     public int getHumidity() {
         return humidity;
     }
 
-    public void setHumidity(int humidity) {
-        this.humidity = humidity;
-    }
-
     public String getIcon() {
         return icon;
-    }
-
-    public void setIcon(String icon) {
-        this.icon = icon;
     }
 
     public long getDt() {
         return dt;
     }
 
-    public void setDt(long dt) {
-        this.dt = dt;
-    }
-
     public long getSunrise() {
         return sunrise;
-    }
-
-    public void setSunrise(long sunrise) {
-        this.sunrise = sunrise;
     }
 
     public long getSunset() {
         return sunset;
     }
 
-    public void setSunset(long sunset) {
-        this.sunset = sunset;
+    public String getDescription() {
+        return this.description;
     }
-    
+
     public boolean getRainingState() {
         return this.rainingState;
     }
-    
+
     public void populateFromSensorResponse(JSONObject result) {
         JSONObject main = result.getJSONObject("main");
         JSONObject sys = result.getJSONObject("sys");
+        JSONObject weather = result.getJSONArray("weather").getJSONObject(0);
 
         this.name = result.getString("name");
         this.dt = result.getLong("dt");
@@ -130,29 +92,34 @@ public class WeatherResult implements Serializable {
         this.temp = main.getDouble("temp");
         this.temp_min = main.getDouble("temp_min");
         this.temp_max = main.getDouble("temp_max");
-        this.rainingState = result.has("rain");
-
-//        this.icon = result.getString("icon");
+//        System.out.println(result.getJSONArray("weather").getJSONObject(0).getString("main"));
+        this.rainingState = weather.getInt("id") < 800;//result.has("rain");
+        this.description = weather.getString("description");
+        this.icon = weather.getString("icon");
     }
 
     @Override
-    public String toString(){
-        LocalDateTime date = new Timestamp(dt * 1000).toLocalDateTime();
-        DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(date);
-        String timeStamp = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(date);
+    public String toString() {
         String result;
 
-        result = "Météo de " + name + " du " + timeStamp + "\n"+
+        result = "Météo de " + name + " du " + getLastUpdateTime() + "\n" +
                 "Température mesurée : " + temp + "°C\nTempérature ressentie : " + feels_like +
                 "°C\nHumidité : " + humidity + "%\nPression : " + pressure + " hPa";
 
-        if(this.rainingState)
-            result += "\nIl pleut.";
-        else
-            result += "\nIl ne pleut pas.";
+        result += "\n" + this.description;
+//        if(this.rainingState)
+//            result += "\nIl pleut.";
+//        else
+//            result += "\nIl ne pleut pas.";
 
         return result;
-
     }
 
+    /**
+     * Time the data was refreshed
+     */
+    public String getLastUpdateTime() {
+        LocalDateTime date = new Timestamp(this.dt * 1000).toLocalDateTime();
+        return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(date);
+    }
 }

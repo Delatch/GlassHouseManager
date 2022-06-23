@@ -4,10 +4,16 @@ import glasshousemanager.commands.Close;
 import glasshousemanager.commands.Open;
 import glasshousemanager.commands.WaterOff;
 import glasshousemanager.commands.WaterOn;
+import glasshousemanager.messaging.Publisher;
+import glasshousemanager.messaging.Subscriber;
 import glasshousemanager.rules.Rule;
 import glasshousemanager.rules.Rules;
-import glasshousemanager.specifications.business.*;
+import glasshousemanager.specifications.business.CloseTheGlassHouse;
+import glasshousemanager.specifications.business.LaunchWatering;
+import glasshousemanager.specifications.business.OpenTheGlassHouse;
+import glasshousemanager.specifications.business.StopWatering;
 import org.json.JSONObject;
+
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -15,7 +21,6 @@ import javax.jms.TextMessage;
 import javax.management.*;
 import java.lang.management.ManagementFactory;
 import java.time.LocalDateTime;
-import glasshousemanager.messaging.*;
 
 /**
  * Classe recevant les informations de la station météo (composant situé sur la même machine)
@@ -33,18 +38,19 @@ public class GlassHouseController extends Subscriber implements GlassHouseContro
     // Seuils
     private int openingTemperature = 25;
     private int wateringTemperature = 30;
-    // Erreurs
-    private String lastActionError="";
+    // l'URL du broker de messagerie
+    private final String brokerURL = "failover://tcp://localhost:61616";
     private LocalDateTime lastActionErrorTime;
+    // Erreurs
+    private String lastActionError = "";
 
     public GlassHouseController() throws MalformedObjectNameException {
         super("callback", "GlassHouseController");
 
-        WeatherChannelAgent a = new WeatherChannelAgent("Lorient");
-        MBeanServer mbs =  ManagementFactory.getPlatformMBeanServer();
+        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         ObjectName name = new ObjectName("WeatherChannelAgent:name=Lorient");
 
-        WeatherChannelMBean mbean = (WeatherChannelMBean) MBeanServerInvocationHandler.newProxyInstance(
+        WeatherChannelMBean mbean = MBeanServerInvocationHandler.newProxyInstance(
                 mbs,    // MBeanServer
                 name,   // ObjectName
                 WeatherChannelMBean.class, // interface
@@ -64,15 +70,24 @@ public class GlassHouseController extends Subscriber implements GlassHouseContro
     public double getTemperature() {
         try {
             return this.lastWeatherResult.getTemp();
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             return -1;
         }
     }
 
     @Override
+    public String getDescription() {
+        return this.lastWeatherResult.getDescription();
+    }
+
+    @Override
     public boolean getRainingState() {
         return this.lastWeatherResult.getRainingState();
+    }
+
+    @Override
+    public String getLastUpdateTime() {
+        return this.lastWeatherResult.getLastUpdateTime();
     }
 
     @Override
@@ -83,6 +98,7 @@ public class GlassHouseController extends Subscriber implements GlassHouseContro
     @Override
     public void setOpeningTemperature(int temp) {
         this.openingTemperature = temp;
+        checkForActions();
     }
 
     @Override
@@ -98,6 +114,7 @@ public class GlassHouseController extends Subscriber implements GlassHouseContro
     @Override
     public void setWateringTemperature(int temp) {
         this.wateringTemperature = temp;
+        checkForActions();
     }
 
     @Override
@@ -132,12 +149,13 @@ public class GlassHouseController extends Subscriber implements GlassHouseContro
 
     @Override
     public String getLastActionErrorTime() {
+        if (this.lastActionErrorTime == null) return "";
         return String.valueOf(this.lastActionErrorTime);
     }
 
     @Override
     public void handleNotification(Notification notification, Object handback) {
-        if (notification.getType() == "json") {
+        if (notification.getType().equals("json")) {
             if (!notification.getMessage().equals(lastReceivedJSON)) {
                 if (parseJSON(notification.getMessage())) {
                     this.lastReceivedJSON = notification.getMessage();
@@ -180,7 +198,7 @@ public class GlassHouseController extends Subscriber implements GlassHouseContro
     private void publish(String message) {
         Publisher pub=null;
         try {
-            pub = new Publisher("action");
+            pub = new Publisher(this.brokerURL, "action");
             pub.publish(message);
         }
         catch(Exception e){
@@ -189,7 +207,9 @@ public class GlassHouseController extends Subscriber implements GlassHouseContro
         }
         finally {
             try {
-                pub.close();
+                if (pub != null) {
+                    pub.close();
+                }
             } catch (JMSException e) {}
         }
     }

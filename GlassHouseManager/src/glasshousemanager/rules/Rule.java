@@ -1,7 +1,7 @@
 package glasshousemanager.rules;
 
-import glasshousemanager.commands.*;
-import glasshousemanager.specifications.*;
+import glasshousemanager.commands.CommandI;
+import glasshousemanager.specifications.SpecificationI;
 
 /** Une Régle de la forme, if(spec)then(command).
  * Si la specification est satisfaite alors la commande est exécutée
@@ -10,7 +10,7 @@ import glasshousemanager.specifications.*;
  * @param <R> le résultat
  */
 public  class Rule<E,R> implements RuleI<E,R>{
-    private static boolean T = false;
+    private final static boolean T = false;
     protected SpecificationI<E> specification;
     protected CommandI<E,R>     command;
 
@@ -26,7 +26,6 @@ public  class Rule<E,R> implements RuleI<E,R>{
         if(T)System.out.print("then(" +this.command+")");
 
         if(this.specification.isSatisfiedBy(e)){
-
             R r1 = this.command.execute(e,r);
 
             if(T)System.out.println(" res=" + r1);

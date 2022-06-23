@@ -1,26 +1,24 @@
 package glasshousemanager.messaging;
 
+import org.apache.activemq.ActiveMQConnection;
+
 import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-
-import org.apache.activemq.ActiveMQConnection;
-
 import java.util.Hashtable;
 
 
 public class Publisher {
     private String topicName;
     private Context contexte;
-    private TopicConnectionFactory connectionFactory;
     private TopicSession session;
     private TopicConnection connection;
+    private static String url = ActiveMQConnection.DEFAULT_BROKER_URL;
 
-//    private static String url = ActiveMQConnection.DEFAULT_BROKER_URL;
-
-    public Publisher(String topicName) {
+    public Publisher(String brokerURL, String topicName) {
         try {
+            url = brokerURL;
             this.topicName = topicName;
             initContext();
             initConnection();
@@ -34,15 +32,18 @@ public class Publisher {
     }
 
     private void initContext() throws NamingException {
-        Hashtable<String, String> props;
-        props = new Hashtable<String, String>();
+        Hashtable<String, String> props = new Hashtable<>();
+
         props.put(Context.INITIAL_CONTEXT_FACTORY, "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
-        props.put(Context.PROVIDER_URL, ActiveMQConnection.DEFAULT_BROKER_URL);
+//        props.put(Context.PROVIDER_URL, ActiveMQConnection.DEFAULT_BROKER_URL);
+        props.put(Context.PROVIDER_URL, url);
+        System.out.println(ActiveMQConnection.DEFAULT_BROKER_URL);
         props.put("topic." + this.topicName, this.topicName);
         contexte = new InitialContext(props);
     }
 
     private void initConnection() throws NamingException, JMSException {
+        TopicConnectionFactory connectionFactory;
         connectionFactory = (TopicConnectionFactory) contexte.lookup("TopicConnectionFactory");
         connection = connectionFactory.createTopicConnection();
         connection.start();
@@ -66,10 +67,5 @@ public class Publisher {
     public void close() throws JMSException {
         session.close();
         connection.close();
-    }
-
-    public static void main(String args[]) throws JMSException, NamingException {
-        Publisher p = new Publisher("Température");
-        p.publish("Encore encore plus chaud");
     }
 }

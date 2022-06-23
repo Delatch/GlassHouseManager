@@ -2,28 +2,40 @@ package glasshousemanager;
 
 public interface GlassHouseControllerMBean {
     // Le temps qu'il fait
-    public double getTemperature();
-    public boolean getRainingState();
+    double getTemperature();
+
+    String getDescription();
+
+    boolean getRainingState();
+
+    // De quand datent les dernières infos ?
+    String getLastUpdateTime();
 
     // température au-delà de laquelle il faut ouvrir
-    public int getOpeningTemperature();
-    public void setOpeningTemperature(int temp);
+    int getOpeningTemperature();
 
-    public String getOpeningState();
+    void setOpeningTemperature(int temp);
+
+    String getOpeningState();
 
     // température au-delà de laquelle il faut faire une aspersion
-    public int getWateringTemperature();
-    public void setWateringTemperature(int temp);
+    int getWateringTemperature();
 
-    public String getWateringState();
+    void setWateringTemperature(int temp);
+
+    String getWateringState();
 
     // actions possibles
-    public void close();
-    public void open();
-    public void waterOn();
-    public void waterOff();
+    void close();
+
+    void open();
+
+    void waterOn();
+
+    void waterOff();
 
     // des erreurs ?
-    public String getLastActionError();
-    public String getLastActionErrorTime();
+    String getLastActionError();
+
+    String getLastActionErrorTime();
 }

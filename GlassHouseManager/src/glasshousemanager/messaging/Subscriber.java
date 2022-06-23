@@ -12,7 +12,6 @@ public class Subscriber {
     private String topicName;
     private String subscriberName;
     private Context contexte;
-    private TopicConnectionFactory connectionFactory;
     private TopicSession session;
     private TopicConnection connection;
     private MessageConsumer subscriber;
@@ -37,8 +36,8 @@ public class Subscriber {
     }
 
     private void initContext() throws NamingException {
-        Hashtable<String, String> props;
-        props = new Hashtable<String, String>();
+        Hashtable<String, String> props = new Hashtable<>();
+
         props.put(Context.INITIAL_CONTEXT_FACTORY, "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
         props.put(Context.PROVIDER_URL, ActiveMQConnection.DEFAULT_BROKER_URL);
         props.put("topic." + topicName, topicName);
@@ -46,13 +45,14 @@ public class Subscriber {
     }
 
     private void initConnection() throws NamingException, JMSException {
-        connectionFactory = (TopicConnectionFactory) contexte.lookup("TopicConnectionFactory");
+        TopicConnectionFactory connectionFactory = (TopicConnectionFactory) contexte.lookup("TopicConnectionFactory");
         connection = connectionFactory.createTopicConnection();
         System.out.println("Intialisation de la connection pour " + this.subscriberName + "." + this.topicName);
 //        Logger.log(LocalDateTime.now() + "Inscription du ClientID " + this.subscriberName + "." + this.topicName);
-        if (connection.getClientID() == null || !connection.getClientID().equals(this.subscriberName + "." + this.topicName)) {
-            connection.setClientID(this.subscriberName + "." + this.topicName);
-        }
+//        if (connection.getClientID() == null || !connection.getClientID().equals(this.subscriberName + "." + this.topicName)) {
+//            connection.setClientID(this.subscriberName + "." + this.topicName);
+//        }
+        connection.setClientID(this.subscriberName);
         connection.start();
     }
 
@@ -73,11 +73,12 @@ public class Subscriber {
     public MessageConsumer getSubscriber() {
         return subscriber;
     }
-        public void onMessage(Message message) {
-            if(message != null) {
-                System.out.println((TextMessage)message);
-            }
+
+    public void onMessage(Message message) {
+        if (message != null) {
+            System.out.println(message);
         }
+    }
 //    }
 }
 

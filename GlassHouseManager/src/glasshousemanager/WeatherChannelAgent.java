@@ -1,19 +1,23 @@
 package glasshousemanager;
 
 import com.sun.jdmk.comm.HtmlAdaptorServer;
-import javax.management.*;
+
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 import java.lang.management.ManagementFactory;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 
 /**
  * Classe d'enregistrement de la station
  * Offre un connecteur RMI et un adpatateur HTML pour connection distante
  */
 public class WeatherChannelAgent {
-    private MBeanServer mbs;
-    private static int interval = 5 * 1000;
+    private static final int interval = 5 * 1000;
+    private final MBeanServer mbs;
 
     public WeatherChannelAgent(String city) {
         mbs = ManagementFactory.getPlatformMBeanServer();
@@ -23,8 +27,16 @@ public class WeatherChannelAgent {
             mbs.registerMBean(station, name);
 
             // Create an RMI connector and start it
+            Registry registry = LocateRegistry.createRegistry(9999);
+            try {
+                registry.unbind("weatherchannel");
+            } catch (Exception e) {
+
+            }
+            // Create an RMI connector and start it
             JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:9999/weatherchannel");
             JMXConnectorServer cs = JMXConnectorServerFactory.newJMXConnectorServer(url, null, mbs);
+            cs.start();
 
             // Create an HTTP adapter and start it
             HtmlAdaptorServer adapter = new HtmlAdaptorServer();

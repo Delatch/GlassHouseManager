@@ -12,17 +12,16 @@ import java.time.Duration;
 
 /**
  * Classe "station météo"
- *
+ * <p>
  * récupère les informations météorologiques d'une ville à intervalle régulier au format JSON
  */
 public class WeatherChannel extends NotificationBroadcasterSupport implements WeatherChannelMBean {
     private WeatherResult wr;
-    private String datas;
     private double temp;
     private Acquisition local;
     private int acquisitionInterval;
-    private String city;
-    private long sequenceNumber=0;
+    private final String city;
+    private long sequenceNumber = 0;
 
     public WeatherChannel() {
         this(12 * 60 * 1000, "Lorient"); // 12 minutes
@@ -35,20 +34,30 @@ public class WeatherChannel extends NotificationBroadcasterSupport implements We
     }
 
     public void setDatas(String json){
-        this.datas = json;
         this.sequenceNumber++;
         sendNotification(
                 new Notification("json",// un nom
-                                        this,
-                                        sequenceNumber, // un numéro
-                                        System.currentTimeMillis(), // une estampille
-                                        json
-                                )
-                );
+                        this,
+                        sequenceNumber, // un numéro
+                        System.currentTimeMillis(), // une estampille
+                        json
+                )
+        );
     }
+
     @Override
     public String getStringInfos() {
         return wr.toString();
+    }
+
+    @Override
+    public String getDescription() {
+        return this.wr.getDescription();
+    }
+
+    @Override
+    public String getLastUpdateTime() {
+        return this.wr.getLastUpdateTime();
     }
 
     @Override
@@ -118,7 +127,7 @@ public class WeatherChannel extends NotificationBroadcasterSupport implements We
         public void setRequest(){
             request = HttpRequest
                     .newBuilder()
-                    .uri(URI.create("https://api.openweathermap.org/data/2.5/weather?q=" + city + "&APPID=960729656d9e37a9ceee3a25b8c4cea6&units=metric"))
+                    .uri(URI.create("https://api.openweathermap.org/data/2.5/weather?q=" + city + "&APPID=960729656d9e37a9ceee3a25b8c4cea6&units=metric&lang=fr"))
                     .timeout(Duration.ofSeconds(30))
                     .build();
         }

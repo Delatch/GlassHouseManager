@@ -1,11 +1,14 @@
 package glasshousemanager;
 
-import glasshousemanager.messaging.*;
-import javax.jms.*;
+import glasshousemanager.messaging.Publisher;
+import glasshousemanager.messaging.Subscriber;
 
-
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.TextMessage;
 
 public class GlassHouseDevices extends Subscriber implements MessageListener {
+    private final String brokerURL = "failover://tcp://192.168.1.53:61616";
 
     public GlassHouseDevices() {
         super("action", "GlassHouseDevices");
@@ -13,18 +16,13 @@ public class GlassHouseDevices extends Subscriber implements MessageListener {
         try {
             getSubscriber().setMessageListener(this);
         } catch (Exception e) {
-//            Logger.log(e.getMessage());
         }
     }
 
     @Override
     public void onMessage(Message message) {
-        System.out.println("onMessage du GHSubscriber");
         try {
             if (message instanceof TextMessage) {
-                TextMessage textMessage = (TextMessage) message;
-//                Logger.log("Received message=>"
-//                        + textMessage.getText() + "' (" + LocalDateTime.now() + ")");
                 handleMessage(((TextMessage) message).getText());
             }
         } catch (Exception e) {
@@ -34,37 +32,25 @@ public class GlassHouseDevices extends Subscriber implements MessageListener {
     }
 
     private void handleMessage(String action) throws Exception {
-        switch(action){
-            case "openTheRoof":
-                publish("Roof_is_opened");
-                break;
-            case "closeTheRoof":
-                publish("Roof_is_closed");
-                break;
-            case "waterOn":
-                publish("Water_is_on");
-                break;
-            case "waterOff":
-                publish("Water_is_off");
-                break;
-            default:
+        switch (action) {
+            case "openTheRoof" -> publish("Roof_is_opened");
+            case "closeTheRoof" -> publish("Roof_is_closed");
+            case "waterOn" -> publish("Water_is_on");
+            case "waterOff" -> publish("Water_is_off");
+            default -> {
                 publish("error : Unknown action !");
-
+                throw new RuntimeException("Unknown action !");
+            }
         }
     }
 
     private void publish(String message) {
         try {
-            Publisher pub = new Publisher("callback");
+            Publisher pub = new Publisher(this.brokerURL, "callback");
             pub.publish(message);
         }
         catch(Exception e){
 
         }
-    }
-
-    public static void main(String args[]) throws InterruptedException {
-        GlassHouseDevices ghd = new GlassHouseDevices();
-        Thread.sleep(Integer.MAX_VALUE);
     }
 }
