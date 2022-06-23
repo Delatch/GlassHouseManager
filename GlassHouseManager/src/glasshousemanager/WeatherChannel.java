@@ -1,7 +1,6 @@
 package glasshousemanager;
 
 import org.json.JSONObject;
-
 import javax.management.Notification;
 import javax.management.NotificationBroadcasterSupport;
 import java.net.URI;

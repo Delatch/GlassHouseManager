@@ -19,7 +19,12 @@ import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 import javax.management.*;
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXServiceURL;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.net.MalformedURLException;
 import java.time.LocalDateTime;
 
 /**
@@ -44,14 +49,19 @@ public class GlassHouseController extends Subscriber implements GlassHouseContro
     // Erreurs
     private String lastActionError = "";
 
-    public GlassHouseController() throws MalformedObjectNameException {
+
+    public GlassHouseController() throws MalformedObjectNameException, IOException {
+        this("localhost", "Lorient");
+    }
+    public GlassHouseController(String weatherChannelAddress, String city) throws MalformedObjectNameException, IOException {
         super("callback", "GlassHouseController");
 
-        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-        ObjectName name = new ObjectName("WeatherChannelAgent:name=Lorient");
+        JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + weatherChannelAddress + ":9999/weatherchannel");
+        JMXConnector connector = JMXConnectorFactory.connect(url);
+        ObjectName name = new ObjectName("WeatherChannelAgent:name=" + city);
 
         WeatherChannelMBean mbean = MBeanServerInvocationHandler.newProxyInstance(
-                mbs,    // MBeanServer
+                connector.getMBeanServerConnection(),    // MBeanServer
                 name,   // ObjectName
                 WeatherChannelMBean.class, // interface
                 false); // détaillé par la suite
@@ -179,8 +189,8 @@ public class GlassHouseController extends Subscriber implements GlassHouseContro
 
         try {
             rules.execute(this, null);
+        } catch (Exception e) {
         }
-        catch(Exception e){}
 
     }
 
@@ -196,21 +206,20 @@ public class GlassHouseController extends Subscriber implements GlassHouseContro
     }
 
     private void publish(String message) {
-        Publisher pub=null;
+        Publisher pub = null;
         try {
             pub = new Publisher(this.brokerURL, "action");
             pub.publish(message);
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             lastActionError = message + " => " + e.getMessage();
             lastActionErrorTime = LocalDateTime.now();
-        }
-        finally {
+        } finally {
             try {
                 if (pub != null) {
                     pub.close();
                 }
-            } catch (JMSException e) {}
+            } catch (JMSException e) {
+            }
         }
     }
 
@@ -234,13 +243,13 @@ public class GlassHouseController extends Subscriber implements GlassHouseContro
                         this.wateringState = "Off";
                         break;
                     default:
-                        if (callback.startsWith("error")){
+                        if (callback.startsWith("error")) {
                             this.lastActionError = callback;
                             this.lastActionErrorTime = LocalDateTime.now();
                         }
                 }
             }
+        } catch (Exception e) {
         }
-        catch(Exception e){}
     }
 }

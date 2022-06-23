@@ -8,11 +8,15 @@ import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 
 public class GlassHouseDevices extends Subscriber implements MessageListener {
-    private final String brokerURL = "failover://tcp://192.168.1.53:61616";
+    private String brokerURL;
 
-    public GlassHouseDevices() {
+    public GlassHouseDevices(){
+        this("failover://tcp://192.168.1.53:61616");
+    }
+    public GlassHouseDevices(String brokerURL) {
         super("action", "GlassHouseDevices");
 
+        this.brokerURL = brokerURL;
         try {
             getSubscriber().setMessageListener(this);
         } catch (Exception e) {
@@ -33,14 +37,21 @@ public class GlassHouseDevices extends Subscriber implements MessageListener {
 
     private void handleMessage(String action) throws Exception {
         switch (action) {
-            case "openTheRoof" -> publish("Roof_is_opened");
-            case "closeTheRoof" -> publish("Roof_is_closed");
-            case "waterOn" -> publish("Water_is_on");
-            case "waterOff" -> publish("Water_is_off");
-            default -> {
+            case "openTheRoof":
+                publish("Roof_is_opened");
+                break;
+            case "closeTheRoof":
+                publish("Roof_is_closed");
+                break;
+            case "waterOn":
+                publish("Water_is_on");
+                break;
+            case "waterOff":
+                publish("Water_is_off");
+                break;
+            default:
                 publish("error : Unknown action !");
                 throw new RuntimeException("Unknown action !");
-            }
         }
     }
 
@@ -48,9 +59,13 @@ public class GlassHouseDevices extends Subscriber implements MessageListener {
         try {
             Publisher pub = new Publisher(this.brokerURL, "callback");
             pub.publish(message);
-        }
-        catch(Exception e){
+        } catch (Exception e) {
 
         }
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        GlassHouseDevices devices = new GlassHouseDevices();
+        Thread.sleep(Integer.MAX_VALUE);
     }
 }

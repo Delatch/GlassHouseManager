@@ -1,13 +1,13 @@
 package glasshousemanager;
 
 import com.sun.jdmk.comm.HtmlAdaptorServer;
-
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 import java.lang.management.ManagementFactory;
+import java.net.InetAddress;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
@@ -16,11 +16,12 @@ import java.rmi.registry.Registry;
  * Offre un connecteur RMI et un adpatateur HTML pour connection distante
  */
 public class WeatherChannelAgent {
-    private static final int interval = 5 * 1000;
-    private final MBeanServer mbs;
+    private static int interval = 5 * 1000;
+
 
     public WeatherChannelAgent(String city) {
-        mbs = ManagementFactory.getPlatformMBeanServer();
+        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+
         try {
             ObjectName name = new ObjectName("WeatherChannelAgent:name=" + city);
             WeatherChannel station = new WeatherChannel(interval, city);
@@ -28,13 +29,9 @@ public class WeatherChannelAgent {
 
             // Create an RMI connector and start it
             Registry registry = LocateRegistry.createRegistry(9999);
-            try {
-                registry.unbind("weatherchannel");
-            } catch (Exception e) {
-
-            }
             // Create an RMI connector and start it
-            JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:9999/weatherchannel");
+            String localHost = InetAddress.getLocalHost().getHostAddress();
+            JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + localHost +":9999/weatherchannel");
             JMXConnectorServer cs = JMXConnectorServerFactory.newJMXConnectorServer(url, null, mbs);
             cs.start();
 
@@ -50,25 +47,24 @@ public class WeatherChannelAgent {
         }
     }
 
-}
 
-//    public static void main(String[] args) throws InterruptedException {
-//        String city = "Lorient";
-//
-//        try{
-//            if(args[0] != null)
-//                interval = Integer.parseInt(args[0]);
-//        }
-//        catch(Exception e){}
-//
-//        try{
-//            if(args[1] != null)
-//                city = args[1];
-//        }
-//        catch(Exception e){}
-//
-//        WeatherChannelAgent agent = new WeatherChannelAgent(city);
-//
-//        Thread.sleep(Integer.MAX_VALUE);
-//    }
-//}
+    public static void main(String[] args) throws InterruptedException {
+        String city = "Lorient";
+
+        try{
+            if(args[0] != null)
+                interval = Integer.parseInt(args[0]);
+        }
+        catch(Exception e){}
+
+        try{
+            if(args[1] != null)
+                city = args[1];
+        }
+        catch(Exception e){}
+
+        WeatherChannelAgent agent = new WeatherChannelAgent(city);
+
+        Thread.sleep(Integer.MAX_VALUE);
+    }
+}
