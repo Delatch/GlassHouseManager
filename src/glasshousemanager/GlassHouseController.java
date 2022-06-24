@@ -1,17 +1,9 @@
 package glasshousemanager;
 
-import glasshousemanager.commands.Close;
-import glasshousemanager.commands.Open;
-import glasshousemanager.commands.WaterOff;
-import glasshousemanager.commands.WaterOn;
-import glasshousemanager.messaging.Publisher;
-import glasshousemanager.messaging.Subscriber;
-import glasshousemanager.rules.Rule;
-import glasshousemanager.rules.Rules;
-import glasshousemanager.specifications.business.CloseTheGlassHouse;
-import glasshousemanager.specifications.business.LaunchWatering;
-import glasshousemanager.specifications.business.OpenTheGlassHouse;
-import glasshousemanager.specifications.business.StopWatering;
+import glasshousemanager.commands.*;
+import glasshousemanager.messaging.*;
+import glasshousemanager.rules.*;
+import glasshousemanager.specifications.business.*;
 import glasshousemanager.utils.Logger;
 
 import org.json.JSONObject;
