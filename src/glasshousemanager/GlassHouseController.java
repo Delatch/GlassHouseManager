@@ -74,6 +74,7 @@ public class GlassHouseController extends Subscriber implements GlassHouseContro
         JMXConnector connector = null;
 
         JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + weatherChannelAddress + ":9999/weatherchannel");
+        Logger.log("Tentative de récupération de la station météo ici : " + url.getURLPath());
         try {
             connector = JMXConnectorFactory.connect(url);
         } catch (IOException e) {

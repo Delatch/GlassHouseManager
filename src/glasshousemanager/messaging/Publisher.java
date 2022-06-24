@@ -1,7 +1,5 @@
 package glasshousemanager.messaging;
 
-import org.apache.logging.log4j.core.tools.picocli.CommandLine;
-
 import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.NamingException;
