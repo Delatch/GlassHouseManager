@@ -18,7 +18,11 @@ import java.rmi.registry.Registry;
 public class WeatherChannelAgent {
     private static int interval = 5 * 1000;
 
-
+    /**
+     * Agent chargé de l'instanciation et de l'enregistrement de la station météo pour accès distant
+     * (Browser HTML, client/console RMI)
+     * Permet la modification de la périodicité
+     */
     public WeatherChannelAgent(String city) {
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 
@@ -63,7 +67,7 @@ public class WeatherChannelAgent {
         }
         catch(Exception e){}
 
-        WeatherChannelAgent agent = new WeatherChannelAgent(city);
+        new WeatherChannelAgent(city);
 
         Thread.sleep(Integer.MAX_VALUE);
     }

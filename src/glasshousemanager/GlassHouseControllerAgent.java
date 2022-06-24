@@ -13,12 +13,26 @@ import java.net.UnknownHostException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
+/**
+ * Agent chargé de l'instanciation et de l'enregistrement du contrôleur de la serre pour accès distant
+ * (Browser HTML, client/console RMI)
+ */
 public class GlassHouseControllerAgent {
+    private static final String DEFAULT_CITY = "Lorient";
 
+    /**
+     * Constructeur par défaut
+     * @throws UnknownHostException
+     */
     public GlassHouseControllerAgent() throws UnknownHostException {
-        this(InetAddress.getLocalHost().getHostAddress(), "Lorient");
+        this(InetAddress.getLocalHost().getHostAddress(), DEFAULT_CITY);
     }
 
+    /**
+     *
+     * @param weatherChannelAddress     url de la station météo
+     * @param city                      ville dont on veut connaître la météo
+     */
     public GlassHouseControllerAgent(String weatherChannelAddress, String city){
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         try {
@@ -37,11 +51,8 @@ public class GlassHouseControllerAgent {
 
             try {
                 registry.unbind("glasshousecontroller");
-            } catch (Exception e) {
+            } catch (Exception e) {}
 
-            }
-
-            //String localHost = InetAddress.getLocalHost().getHostAddress();
             JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + weatherChannelAddress +":9999/glasshousecontroller");
             JMXConnectorServer cs = JMXConnectorServerFactory.newJMXConnectorServer(url, null, mbs);
             cs.start();
@@ -50,7 +61,12 @@ public class GlassHouseControllerAgent {
             HtmlAdaptorServer adapter = new HtmlAdaptorServer();
             adapter.setPort(8088);
             name = new ObjectName("HtmlAdaptorServer:name=html,port=8088");
-//            mbs.unregisterMBean(name);
+
+            try {
+                mbs.unregisterMBean(name);
+            }
+            catch(Exception e){}
+
             mbs.registerMBean(adapter, name);
             adapter.start();
 
@@ -59,13 +75,20 @@ public class GlassHouseControllerAgent {
         }
     }
 
+    /**
+     * Point d'entrée de la classe
+     * @param args                      Deux paramètres possibles :
+     *                                      - l'adresse de la station météo (indice 0)
+     *                                      - la ville dont on veut observer la météo (indice 1)
+     * @throws InterruptedException
+     */
     public static void main(String[] args) throws InterruptedException {
-        String weatherStationAddress = "localhost";
+        String weatherChannelAddress = "localhost";
         String city = "Lorient";
 
         try{
             if(args[0] != null)
-                weatherStationAddress = args[0];
+                weatherChannelAddress = args[0];
         }
         catch(Exception e){}
 
@@ -75,7 +98,7 @@ public class GlassHouseControllerAgent {
         }
         catch(Exception e){}
 
-        GlassHouseControllerAgent agent2 = new GlassHouseControllerAgent(weatherStationAddress, city);
+        new GlassHouseControllerAgent(weatherChannelAddress, city);
 
         Thread.sleep(Integer.MAX_VALUE);
     }

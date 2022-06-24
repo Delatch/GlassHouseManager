@@ -3,7 +3,9 @@ package glasshousemanager.specifications.business;
 import glasshousemanager.GlassHouseControllerMBean;
 import glasshousemanager.specifications.SpecificationI;
 
-// La température est-elle sous le seuil de déclenchement de l'ouverture ?
+/**
+ * La température est-elle sous le seuil de déclenchement de l'ouverture ?
+ */
 public class TemperatureUnderOpeningFloor implements SpecificationI<GlassHouseControllerMBean> {
     @Override
     public boolean isSatisfiedBy(GlassHouseControllerMBean ghs) {

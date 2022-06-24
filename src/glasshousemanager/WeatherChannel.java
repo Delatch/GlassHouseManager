@@ -1,5 +1,6 @@
 package glasshousemanager;
 
+import glasshousemanager.utils.Logger;
 import org.json.JSONObject;
 import javax.management.Notification;
 import javax.management.NotificationBroadcasterSupport;
@@ -34,7 +35,7 @@ public class WeatherChannel extends NotificationBroadcasterSupport implements We
 
     public void setDatas(String json){
         this.sequenceNumber++;
-        System.out.println("Notification sent ! (" + json.substring(0, 15) + "...)");
+        Logger.log("Notification sent ! (" + json.substring(0, 15) + "...)");
         sendNotification(
                 new Notification("json",// un nom
                         this,
@@ -84,7 +85,7 @@ public class WeatherChannel extends NotificationBroadcasterSupport implements We
     public void reset() {
         if(this.local == null) return;
 
-        System.out.println("Station relancée !!");
+        Logger.log("Station relancée !!");
         this.local.interrupt();
 
         try {
@@ -120,7 +121,7 @@ public class WeatherChannel extends NotificationBroadcasterSupport implements We
                     Thread.sleep(WeatherChannel.this.acquisitionInterval);
                 }
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+                Logger.log(e.getMessage());
             }
         }
 

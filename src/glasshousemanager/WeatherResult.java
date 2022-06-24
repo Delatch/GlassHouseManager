@@ -8,6 +8,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 
+/**
+ * Classe de mise en forme du JSON reçu par l'API "station météo"
+ */
 public class WeatherResult implements Serializable {
     private String name;
     private double temp;
@@ -107,10 +110,6 @@ public class WeatherResult implements Serializable {
                 "°C\nHumidité : " + humidity + "%\nPression : " + pressure + " hPa";
 
         result += "\n" + this.description;
-//        if(this.rainingState)
-//            result += "\nIl pleut.";
-//        else
-//            result += "\nIl ne pleut pas.";
 
         return result;
     }
