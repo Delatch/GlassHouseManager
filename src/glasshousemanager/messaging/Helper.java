@@ -23,6 +23,13 @@ public class Helper {
         }
     }
 
+    public static String formatBrokerURL(String brokerURL){
+        if(!brokerURL.contains("tcp")){
+            brokerURL = "failover://tcp://" + brokerURL + ":61616";
+        }
+        return brokerURL;
+    }
+
     public static Context getContext(String URL, String topicName) throws NamingException {
         Hashtable<String, String> props = new Hashtable<>();
 

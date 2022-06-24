@@ -1,5 +1,7 @@
 package glasshousemanager.messaging;
 
+import org.apache.logging.log4j.core.tools.picocli.CommandLine;
+
 import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.NamingException;
@@ -19,6 +21,9 @@ public class Publisher {
     public Publisher(String brokerURL, String topicName) {
         try {
             this.topicName = topicName;
+
+            brokerURL = Helper.formatBrokerURL(brokerURL);
+
             context = Helper.getContext(brokerURL, topicName);
             connection = Helper.initTopicConnection(context);
             session = Helper.initTopicSession(connection);

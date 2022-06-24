@@ -26,6 +26,8 @@ public class Subscriber {
             this.topicName = topicName;
             this.subscriberName = subscriberName;
 
+            brokerURL = Helper.formatBrokerURL(brokerURL);
+
             context = Helper.getContext(brokerURL, topicName);
             connection = Helper.initTopicConnection(context, subscriberName);
             session = Helper.initTopicSession(connection);

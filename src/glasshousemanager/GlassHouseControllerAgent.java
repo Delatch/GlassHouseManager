@@ -89,8 +89,8 @@ public class GlassHouseControllerAgent {
      * @throws InterruptedException
      */
     public static void main(String[] args) throws InterruptedException {
-        String weatherChannelAddress = "192.168.56.1"; //"localhost";
-        String city = "Brest"; //"Lorient";
+        String weatherChannelAddress = "localhost";
+        String city = "Lorient";
 
         try{
             if(args[0] != null)
