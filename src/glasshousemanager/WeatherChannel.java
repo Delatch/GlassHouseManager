@@ -12,8 +12,9 @@ import java.time.Duration;
 
 /**
  * Classe "station météo"
- * <p>
+ *
  * récupère les informations météorologiques d'une ville à intervalle régulier au format JSON
+ * et les émet à destination d'éventuels observateurs
  */
 public class WeatherChannel extends NotificationBroadcasterSupport implements WeatherChannelMBean {
     private WeatherResult wr;
@@ -22,18 +23,29 @@ public class WeatherChannel extends NotificationBroadcasterSupport implements We
     private int acquisitionInterval;
     private final String city;
     private long sequenceNumber = 0;
-
+    private static final int DEFAULT_INTERVAL = 12 * 60 * 1000; // 12 minutes, le temps de rafraichissement des données de l'API
+    private static final String DEFAULT_CITY = "Lorient";
+    /**
+     * Constructeur par défaut
+     * Lance le thread d'acquisition avec les paramètres par défaut
+     */
     public WeatherChannel() {
-        this(12 * 60 * 1000, "Lorient"); // 12 minutes
+        this(DEFAULT_INTERVAL, DEFAULT_CITY); // 12 minutes
     }
 
+    /**
+     * Station météo
+     * @param interval  : délai, exprimé en millisecondes, entre 2 interrogations
+     * @param city      : ville observée
+     */
     public WeatherChannel(int interval, String city) {
         this.acquisitionInterval = interval;
         this.city = city;
         this.local = new Acquisition(this.getCity());
     }
 
-    public void setDatas(String json){
+    // entraine l'envoi d'une notification
+    private void setDatas(String json){
         this.sequenceNumber++;
         Logger.log("Notification sent ! (" + json.substring(0, 15) + "...)");
         sendNotification(
@@ -96,7 +108,7 @@ public class WeatherChannel extends NotificationBroadcasterSupport implements We
         local = new Acquisition(city);
     }
 
-
+    // Classe privée chargée de l'acquisition des données de l'API via un thread indépendant
     private class Acquisition extends Thread implements java.io.Serializable {
         HttpClient client;
         HttpRequest request;

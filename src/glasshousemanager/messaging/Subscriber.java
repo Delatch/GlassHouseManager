@@ -27,7 +27,7 @@ public class Subscriber {
             this.subscriberName = subscriberName;
 
             context = Helper.getContext(brokerURL, topicName);
-            connection = Helper.initTopicConnection(context);
+            connection = Helper.initTopicConnection(context, subscriberName);
             session = Helper.initTopicSession(connection);
             initSubscription();
 

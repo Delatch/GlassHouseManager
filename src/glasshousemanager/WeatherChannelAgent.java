@@ -1,6 +1,8 @@
 package glasshousemanager;
 
 import com.sun.jdmk.comm.HtmlAdaptorServer;
+import glasshousemanager.utils.Logger;
+
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnectorServer;
@@ -36,6 +38,7 @@ public class WeatherChannelAgent {
             // Create an RMI connector and start it
             String localHost = InetAddress.getLocalHost().getHostAddress();
             JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + localHost +":9999/weatherchannel");
+            Logger.log("Enregistrement de la station météo ici : " + "service:jmx:rmi:///jndi/rmi://" + localHost +":9999/weatherchannel");
             JMXConnectorServer cs = JMXConnectorServerFactory.newJMXConnectorServer(url, null, mbs);
             cs.start();
 

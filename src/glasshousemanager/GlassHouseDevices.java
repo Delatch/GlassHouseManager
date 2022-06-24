@@ -20,7 +20,7 @@ public class GlassHouseDevices extends Subscriber implements MessageListener {
     /**
      * Constructeur par défaut, utilise l'adresse par défaut du serveur de messagerie
      */
-    public GlassHouseDevices(){
+    public GlassHouseDevices() {
         this(Helper.DEFAULT_BROKER_URL);
     }
 
@@ -72,7 +72,7 @@ public class GlassHouseDevices extends Subscriber implements MessageListener {
 
     private void publish(String message) {
         try {
-            if(this.callbackPublisher == null)
+            if (this.callbackPublisher == null)
                 this.callbackPublisher = new Publisher(this.brokerURL, "callback");
 
             this.callbackPublisher.publish(message);
@@ -82,8 +82,23 @@ public class GlassHouseDevices extends Subscriber implements MessageListener {
         }
     }
 
+    /**
+     *
+     * Point d'entrée de la classe
+     *
+     * @param args                  premier paramètre, optionnel, l'adresse du broker de messagerie (indice 0)
+     * @throws InterruptedException
+     */
     public static void main(String[] args) throws InterruptedException {
-        GlassHouseDevices devices = new GlassHouseDevices();
+        String brokerURL = "localhost";
+
+        try {
+            if (args[0] != null)
+                brokerURL = args[0];
+        } catch (Exception e) {
+        }
+
+        new GlassHouseDevices(brokerURL);
         Thread.sleep(Integer.MAX_VALUE);
     }
 }

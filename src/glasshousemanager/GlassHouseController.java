@@ -7,6 +7,7 @@ import glasshousemanager.specifications.business.*;
 import glasshousemanager.utils.Logger;
 
 import org.json.JSONObject;
+
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -53,6 +54,7 @@ public class GlassHouseController extends Subscriber implements GlassHouseContro
 
     /**
      * Constructeur par défaut
+     *
      * @throws MalformedObjectNameException
      * @throws IOException
      */
@@ -61,16 +63,23 @@ public class GlassHouseController extends Subscriber implements GlassHouseContro
     }
 
     /**
-     * @param weatherChannelAddress             : adresse de la station météo
-     * @param city                              : ville dont on veut observer la météo
+     * @param weatherChannelAddress : adresse de la station météo
+     * @param city                  : ville dont on veut observer la météo
      * @throws MalformedObjectNameException
      * @throws IOException
      */
-    public GlassHouseController(String weatherChannelAddress, String city) throws MalformedObjectNameException, IOException {
+    public GlassHouseController(String weatherChannelAddress, String city) throws IOException, MalformedObjectNameException {
         super(BROKER_URL, CALLBACK_TOPIC_NAME, SUBSCRIBER_NAME);
 
+        JMXConnector connector = null;
+
         JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + weatherChannelAddress + ":9999/weatherchannel");
-        JMXConnector connector = JMXConnectorFactory.connect(url);
+        try {
+            connector = JMXConnectorFactory.connect(url);
+        } catch (IOException e) {
+            throw new IOException("La station météo est-elle lancée ? " + e.getMessage());
+        }
+
         ObjectName name = new ObjectName("WeatherChannelAgent:name=" + city);
 
         WeatherChannelMBean mbean = MBeanServerInvocationHandler.newProxyInstance(
@@ -79,7 +88,11 @@ public class GlassHouseController extends Subscriber implements GlassHouseContro
                 WeatherChannelMBean.class, // interface
                 false); // détaillé par la suite
 
-        mbean.addNotificationListener(this, null, null);
+        try {
+            mbean.addNotificationListener(this, null, null);
+        } catch (Exception e) {
+            throw new IOException("La station pointe-t-elle sur cette ville ? (" + city + ")");
+        }
 
         try {
             getSubscriber().setMessageListener(this);
@@ -190,8 +203,7 @@ public class GlassHouseController extends Subscriber implements GlassHouseContro
                     this.lastReceivedJSON = notification.getMessage();
                     checkForActions();
                 }
-            }
-            else{
+            } else {
                 Logger.log("=> Same content as the previous one. Unprocessed.");
             }
         }
@@ -229,7 +241,7 @@ public class GlassHouseController extends Subscriber implements GlassHouseContro
 
     private void publish(String message) {
         try {
-            if(this.actionPublisher == null)
+            if (this.actionPublisher == null)
                 this.actionPublisher = new Publisher(BROKER_URL, "action");
 
             this.actionPublisher.publish(message);

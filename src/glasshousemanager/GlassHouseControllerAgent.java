@@ -38,6 +38,12 @@ public class GlassHouseControllerAgent {
         try {
             ObjectName name = new ObjectName("GlassHouseControllerAgent:name=Controller1");
             GlassHouseController controller = new GlassHouseController(weatherChannelAddress, city);
+
+            try {
+                mbs.unregisterMBean(name);
+            }
+            catch(Exception e){}
+
             mbs.registerMBean(controller, name);
 
             // Create an RMI connector and start it
@@ -83,8 +89,8 @@ public class GlassHouseControllerAgent {
      * @throws InterruptedException
      */
     public static void main(String[] args) throws InterruptedException {
-        String weatherChannelAddress = "localhost";
-        String city = "Lorient";
+        String weatherChannelAddress = "192.168.56.1"; //"localhost";
+        String city = "Brest"; //"Lorient";
 
         try{
             if(args[0] != null)
