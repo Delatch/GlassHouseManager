@@ -45,7 +45,7 @@ public class WeatherChannelAgent {
             // Create an HTTP adapter and start it
             HtmlAdaptorServer adapter = new HtmlAdaptorServer();
             adapter.setPort(8088);
-            name = new ObjectName("HtmlAdaptorServer:name=html,port=8088");
+            name = new ObjectName("HtmlAdaptorServer:name=WeatherChannel,port=8088");
             mbs.registerMBean(adapter, name);
 
             adapter.start();

@@ -2,6 +2,7 @@ package glasshousemanager.specifications.business;
 
 import glasshousemanager.GlassHouseControllerMBean;
 import glasshousemanager.specifications.All;
+import glasshousemanager.specifications.And;
 import glasshousemanager.specifications.Not;
 
 /**
@@ -12,8 +13,9 @@ import glasshousemanager.specifications.Not;
  */
 public class LaunchWatering extends All<GlassHouseControllerMBean>{
     public LaunchWatering(){
-        this.add(new TemperatureAboveOrEqualsSprinklingFloor())
-                .add(new Not<GlassHouseControllerMBean>(new WateringIsOn()))
-                .add(new Not<GlassHouseControllerMBean>(new IsRaining()));
+        this.add(new And<GlassHouseControllerMBean>(
+                    new And<GlassHouseControllerMBean>(new TemperatureAboveOrEqualsSprinklingFloor(),
+                                                        new Not<GlassHouseControllerMBean>(new WateringIsOn())),
+                new Not<GlassHouseControllerMBean>(new IsRaining())));
     }
 }

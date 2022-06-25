@@ -66,12 +66,12 @@ public class GlassHouseControllerAgent {
             // Create an HTTP adapter and start it
             HtmlAdaptorServer adapter = new HtmlAdaptorServer();
             adapter.setPort(8088);
-            name = new ObjectName("HtmlAdaptorServer:name=html,port=8088");
+            name = new ObjectName("HtmlAdaptorServer:name=controller,port=8088");
 
-            try {
-                mbs.unregisterMBean(name);
-            }
-            catch(Exception e){}
+//            try {
+//                mbs.unregisterMBean(name);
+//            }
+//            catch(Exception e){}
 
             mbs.registerMBean(adapter, name);
             adapter.start();

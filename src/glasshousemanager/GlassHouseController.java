@@ -179,7 +179,7 @@ public class GlassHouseController extends Subscriber implements GlassHouseContro
 
     @Override
     public void waterOff() {
-        Logger.log("waterOf invoked !");
+        Logger.log("waterOff invoked !");
         publish("waterOff");
     }
 
@@ -225,6 +225,7 @@ public class GlassHouseController extends Subscriber implements GlassHouseContro
         try {
             rules.execute(this, null);
         } catch (Exception e) {
+            e.printStackTrace();
         }
 
     }

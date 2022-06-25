@@ -2,6 +2,7 @@ package glasshousemanager.specifications.business;
 
 import glasshousemanager.GlassHouseControllerMBean;
 import glasshousemanager.specifications.All;
+import glasshousemanager.specifications.And;
 import glasshousemanager.specifications.Not;
 import glasshousemanager.specifications.Or;
 
@@ -12,7 +13,7 @@ import glasshousemanager.specifications.Or;
  */
 public class CloseTheGlassHouse extends All<GlassHouseControllerMBean> {
     public CloseTheGlassHouse() {
-        this.add(new Not<GlassHouseControllerMBean>(new IsClosed()))
-                .add(new Or<GlassHouseControllerMBean>(new IsRaining(), new TemperatureUnderOpeningFloor()));;
+        this.add(new And<GlassHouseControllerMBean>(new Not<GlassHouseControllerMBean>(new IsClosed()),
+                new Or<GlassHouseControllerMBean>(new IsRaining(), new TemperatureUnderOpeningFloor())));;
     }
 }

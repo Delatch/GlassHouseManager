@@ -1,9 +1,9 @@
 package glasshousemanager.specifications.business;
 
 import glasshousemanager.GlassHouseControllerMBean;
-import glasshousemanager.specifications.All;
-import glasshousemanager.specifications.Not;
-import glasshousemanager.specifications.Or;
+import glasshousemanager.specifications.*;
+
+import java.awt.*;
 
 /**
  * On eteint l'arrosage si
@@ -12,7 +12,7 @@ import glasshousemanager.specifications.Or;
  */
 public class StopWatering extends All<GlassHouseControllerMBean>{
     public StopWatering() {
-        this.add(new Not<GlassHouseControllerMBean>(new WateringIsOff()))
-                .add(new Or<GlassHouseControllerMBean>(new IsRaining(), new TemperatureUnderSprinklingFloor()));
+        this.add(new And<GlassHouseControllerMBean>((new Not<GlassHouseControllerMBean>(new WateringIsOff())),
+                new Or<GlassHouseControllerMBean>(new IsRaining(), new TemperatureUnderSprinklingFloor())));
     }
 }
